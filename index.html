@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>今週のニュース</title>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#c9d8f0;}
+body{font-family:"Noto Sans JP","Noto Sans CJK JP","Meiryo","Hiragino Sans",sans-serif;}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;
+  background:#d3e0f5;-webkit-transform-origin:0 0;transform-origin:0 0;}
+
+/* ヘッダー（マーケット画面と共通の配置） */
+#clock{position:absolute;left:70px;top:25px;font-size:120px;font-weight:bold;color:#e0357f;line-height:1.1;}
+#logo{position:absolute;right:80px;top:24px;}
+#logo img{height:56px;display:block;}
+#date{position:absolute;right:80px;top:92px;font-size:48px;font-weight:bold;color:#1a2a6c;}
+#ttl{position:absolute;left:420px;width:1080px;top:30px;text-align:center;color:#1a2a6c;}
+#ttl .t{font-size:64px;font-weight:bold;letter-spacing:10px;line-height:1.2;}
+#ttl .w{font-size:34px;font-weight:bold;letter-spacing:2px;margin-top:4px;}
+
+/* ニュース本体 */
+#card{position:absolute;left:60px;top:180px;width:1800px;height:680px;background:#fff;overflow:hidden;}
+#bar{position:absolute;left:0;top:0;width:1800px;height:96px;background:#1f2fb8;}
+#no{position:absolute;left:40px;top:0;height:96px;line-height:96px;font-size:68px;font-weight:bold;color:#fff;}
+#cat{position:absolute;left:150px;top:18px;height:60px;line-height:60px;padding:0 30px;font-size:38px;font-weight:bold;color:#fff;letter-spacing:3px;}
+#cnt{position:absolute;right:40px;top:0;height:96px;line-height:96px;font-size:40px;font-weight:bold;color:#c9d6ff;letter-spacing:2px;}
+#hd{position:absolute;left:60px;top:136px;width:1680px;white-space:nowrap;overflow:hidden;
+  font-size:92px;font-weight:bold;color:#0f1a4a;line-height:1.2;
+  border-left:16px solid #e0357f;padding-left:30px;-webkit-box-sizing:border-box;box-sizing:border-box;}
+#rule{position:absolute;left:60px;top:278px;width:1680px;height:4px;background:#d3e0f5;}
+#bd{position:absolute;left:60px;top:310px;width:1680px;height:300px;overflow:hidden;
+  font-size:54px;line-height:1.62;color:#1d2433;font-weight:bold;}
+#nt{color:#c62a24;font-size:0.82em;}
+#src{position:absolute;right:50px;bottom:22px;font-size:28px;color:#556;}
+#prog{position:absolute;left:0;bottom:0;height:10px;width:0;background:#e0357f;}
+
+/* 下段：今週の一覧 */
+#list{position:absolute;left:60px;top:884px;width:1800px;}
+#list table{width:1800px;border-collapse:separate;border-spacing:0;table-layout:fixed;}
+#list td{padding:0 6px;}
+#list td:first-child{padding-left:0;} #list td:last-child{padding-right:0;}
+.it{height:146px;background:#eef3fb;border-top:8px solid #9fb3d9;overflow:hidden;padding:10px 16px 0 16px;
+  -webkit-box-sizing:border-box;box-sizing:border-box;}
+.it .n{font-size:28px;font-weight:bold;color:#1f2fb8;white-space:nowrap;overflow:hidden;}
+.it .h{font-size:27px;font-weight:bold;color:#334;line-height:1.32;height:72px;margin-top:4px;overflow:hidden;margin-top:2px;}
+.it.on{background:#1f2fb8;border-top-color:#e0357f;}
+.it.on .n{color:#ffd1e3;} .it.on .h{color:#fff;}
+
+#foot{position:absolute;left:62px;bottom:6px;font-size:20px;color:#334;}
+#err{display:none;position:absolute;left:60px;top:420px;width:1800px;text-align:center;font-size:56px;font-weight:bold;color:#1a2a6c;}
+</style>
+</head>
+<body>
+<div id="stage">
+ <div id="clock">--:--</div>
+ <div id="ttl"><div class="t">今週のニュース</div><div class="w" id="wk"></div></div>
+ <div id="logo"><img src="logo.png" alt="青山メインランド"></div>
+ <div id="date"></div>
+
+ <div id="card">
+  <div id="bar"><div id="no"></div><div id="cat"></div><div id="cnt"></div></div>
+  <div id="hd"></div>
+  <div id="rule"></div>
+  <div id="bd"></div>
+  <div id="src"></div>
+  <div id="prog"></div>
+ </div>
+
+ <div id="list"><table><tr id="lr"></tr></table></div>
+ <div id="foot">各見出しは報道・公表資料をもとに作成</div>
+ <div id="err">ニュースを読み込めませんでした</div>
+</div>
+
+<script>
+/* news.js を10分ごとに新しく読み込む（GitHub側の更新を反映するため） */
+document.write('<script src="news.js?v=' + Math.floor(new Date().getTime() / 600000) + '"><\/script>');
+</script>
+<script>
+var CYCLE = 600;              /* 1周10分（サイネージのスケジュールに合わせる） */
+var LAPS = 2;                 /* 10分の間に全ニュースを何周させるか */
+var CAT_COLOR = {
+  "コンプライアンス": "#d9463d",
+  "情報セキュリティ": "#e8890c",
+  "経済": "#178a5a",
+  "不動産": "#0a7fd0"
+};
+var MARK = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
+var lastIdx = -1, lastPos = -1, items = [];
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function p2(n){ return (n < 10 ? "0" : "") + n; }
+function mark(i){ return i < MARK.length ? MARK.charAt(i) : String(i + 1); }
+
+function fit(){
+  var w = window.innerWidth || document.documentElement.clientWidth;
+  var h = window.innerHeight || document.documentElement.clientHeight;
+  var k = Math.min(w / 1920, h / 1080);
+  var st = $("stage"), t = "scale(" + k + ")";
+  st.style.webkitTransform = t; st.style.transform = t;
+  st.style.left = ((w - 1920 * k) / 2) + "px"; st.style.top = ((h - 1080 * k) / 2) + "px";
+}
+function tick(){
+  var d = new Date();
+  $("clock").innerHTML = d.getHours() + ":" + p2(d.getMinutes());
+  $("date").innerHTML = (d.getMonth() + 1) + "月" + d.getDate() + "日（" + "日月火水木金土".charAt(d.getDay()) + "）";
+}
+
+/* 長い見出し・本文は枠に収まるまで文字を小さくする */
+function shrink(el, start, min, test){
+  var s = start;
+  el.style.fontSize = s + "px";
+  while (s > min && test(el)) { s -= 2; el.style.fontSize = s + "px"; }
+}
+
+function buildList(){
+  var html = "", i;
+  for (i = 0; i < items.length; i++) {
+    html += '<td><div class="it" id="it' + i + '"><div class="n">' + mark(i) + " " + esc(items[i].cat) +
+            '</div><div class="h">' + esc(items[i].title) + "</div></div></td>";
+  }
+  $("lr").innerHTML = html;
+}
+
+function show(i){
+  var n = items[i], col = CAT_COLOR[n.cat] || "#5a6478", j;
+  $("no").innerHTML = mark(i);
+  $("cat").innerHTML = esc(n.cat);
+  $("cat").style.background = col;
+  $("cnt").innerHTML = (i + 1) + " / " + items.length;
+  $("hd").innerHTML = esc(n.title);
+  $("bd").innerHTML = esc(n.body) + (n.note ? '<br><span id="nt">' + esc(n.note) + "</span>" : "");
+  $("src").innerHTML = n.source ? "出典：" + esc(n.source) : "";
+  shrink($("hd"), 92, 56, function(e){ return e.scrollWidth > e.clientWidth; });
+  shrink($("bd"), 54, 36, function(e){ return e.scrollHeight > e.clientHeight; });
+  for (j = 0; j < items.length; j++) { $("it" + j).className = (j === i) ? "it on" : "it"; }
+}
+
+function safeReload(){
+  var base = location.href.split("?")[0], x;
+  try {
+    x = new XMLHttpRequest();
+    x.open("GET", base + "?chk=" + new Date().getTime(), true);
+    x.onreadystatechange = function(){
+      if (x.readyState === 4 && x.status === 200) { location.replace(base + "?t=" + new Date().getTime()); }
+    };
+    x.send(null);
+  } catch (e) {}
+}
+
+/* 時計に合わせて切り替え（どのサイネージでも同じ時刻に同じニュース） */
+function rotate(){
+  var pos = Math.floor(new Date().getTime() / 1000) % CYCLE;
+  if (lastPos >= 0 && pos < lastPos) { safeReload(); }
+  lastPos = pos;
+  var per = CYCLE / (items.length * LAPS);
+  var idx = Math.floor(pos / per) % items.length;
+  if (idx !== lastIdx) { show(idx); lastIdx = idx; }
+  var r = (pos % per) / per;
+  $("prog").style.width = Math.round(1800 * r) + "px";
+}
+
+window.onresize = fit;
+fit(); tick();
+if (typeof NEWS === "undefined" || !NEWS.items || !NEWS.items.length) {
+  $("card").style.display = "none"; $("list").style.display = "none"; $("err").style.display = "block";
+  setTimeout(function(){ location.replace(location.href.split("?")[0] + "?t=" + new Date().getTime()); }, 60000);
+} else {
+  items = NEWS.items;
+  $("wk").innerHTML = esc(NEWS.week || "");
+  buildList(); rotate();
+  setInterval(rotate, 1000);
+}
+setInterval(tick, 5000);
+</script>
+</body>
+</html>
