@@ -83,8 +83,17 @@ var CAT_COLOR = {
   "コンプライアンス": "#d9463d",
   "情報セキュリティ": "#e8890c",
   "経済": "#178a5a",
-  "不動産": "#0a7fd0"
+  "不動産": "#0a7fd0",
+  "金利": "#0a7fd0",
+  "為替": "#6a3fb5"
 };
+/* 「不動産・金利」のような組み合わせは、先頭の分類の色を使う */
+function catColor(c){
+  c = String(c || "");
+  if (CAT_COLOR[c]) return CAT_COLOR[c];
+  var h = c.split(/[・／\/]/)[0];
+  return CAT_COLOR[h] || "#5a6478";
+}
 var MARK = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
 var lastIdx = -1, lastPos = -1, items = [];
 
@@ -121,10 +130,15 @@ function buildList(){
             '</div><div class="h">' + esc(items[i].title) + "</div></div></td>";
   }
   $("lr").innerHTML = html;
+  /* 件数が多い週は、一覧の分類名が枠に収まるよう小さくする */
+  var ns = $("lr").getElementsByTagName("div");
+  for (i = 0; i < ns.length; i++) {
+    if (ns[i].className === "n") shrink(ns[i], 28, 18, function(e){ return e.scrollWidth > e.clientWidth; });
+  }
 }
 
 function show(i){
-  var n = items[i], col = CAT_COLOR[n.cat] || "#5a6478", j;
+  var n = items[i], col = catColor(n.cat), j;
   $("no").innerHTML = mark(i);
   $("cat").innerHTML = esc(n.cat);
   $("cat").style.background = col;
