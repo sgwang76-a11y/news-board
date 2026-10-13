@@ -85,7 +85,10 @@ var CAT_COLOR = {
   "経済": "#178a5a",
   "不動産": "#0a7fd0",
   "金利": "#0a7fd0",
-  "為替": "#6a3fb5"
+  "為替": "#6a3fb5",
+  "株式市場": "#178a5a",
+  "エネルギー": "#b8860b",
+  "AI": "#0f8a8a"
 };
 /* 「不動産・金利」のような組み合わせは、先頭の分類の色を使う */
 function catColor(c){
@@ -96,6 +99,7 @@ function catColor(c){
 }
 var MARK = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
 var lastIdx = -1, lastPos = -1, items = [];
+var SEC = 0, START = new Date().getTime(), lastLoop = -1;
 
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -165,6 +169,17 @@ function safeReload(){
 
 /* 時計に合わせて切り替え（どのサイネージでも同じ時刻に同じニュース） */
 function rotate(){
+  /* news.js に seconds がある場合：1件あたりの秒数を固定し、表示開始時に①から順に流す */
+  if (SEC > 0) {
+    var el = (new Date().getTime() - START) / 1000;
+    var loop = Math.floor(el / (SEC * items.length));
+    /* 10分以上たったら、1周が終わって①に戻るときに読み込み直す（GitHub側の更新を反映） */
+    if (loop !== lastLoop) { if (lastLoop >= 0 && el >= 600) { safeReload(); } lastLoop = loop; }
+    var k = Math.floor(el / SEC) % items.length;
+    if (k !== lastIdx) { show(k); lastIdx = k; }
+    $("prog").style.width = Math.round(1800 * ((el % SEC) / SEC)) + "px";
+    return;
+  }
   var pos = Math.floor(new Date().getTime() / 1000) % CYCLE;
   if (lastPos >= 0 && pos < lastPos) { safeReload(); }
   lastPos = pos;
@@ -182,6 +197,7 @@ if (typeof NEWS === "undefined" || !NEWS.items || !NEWS.items.length) {
   setTimeout(function(){ location.replace(location.href.split("?")[0] + "?t=" + new Date().getTime()); }, 60000);
 } else {
   items = NEWS.items;
+  SEC = Number(NEWS.seconds) || 0;
   $("wk").innerHTML = esc(NEWS.week || "");
   buildList(); rotate();
   setInterval(rotate, 1000);
