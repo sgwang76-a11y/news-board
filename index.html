@@ -48,6 +48,9 @@ body{font-family:"Noto Sans JP","Noto Sans CJK JP","Meiryo","Hiragino Sans",sans
 .it.on .n{color:#ffd1e3;} .it.on .h{color:#fff;}
 
 #foot{position:absolute;left:62px;bottom:6px;font-size:20px;color:#334;}
+/* ニュースのあとに流す動画（画面全体に表示） */
+#vbox{display:none;position:absolute;left:0;top:0;width:1920px;height:1080px;background:#000;}
+#vid{width:1920px;height:1080px;display:block;background:#000;}
 #err{display:none;position:absolute;left:60px;top:420px;width:1800px;text-align:center;font-size:56px;font-weight:bold;color:#1a2a6c;}
 </style>
 </head>
@@ -70,6 +73,7 @@ body{font-family:"Noto Sans JP","Noto Sans CJK JP","Meiryo","Hiragino Sans",sans
  <div id="list"><table><tr id="lr"></tr></table></div>
  <div id="foot">各見出しは報道・公表資料をもとに作成</div>
  <div id="err">ニュースを読み込めませんでした</div>
+ <div id="vbox"><video id="vid" muted playsinline preload="auto"></video></div>
 </div>
 
 <script>
@@ -88,7 +92,10 @@ var CAT_COLOR = {
   "為替": "#6a3fb5",
   "株式市場": "#178a5a",
   "エネルギー": "#b8860b",
-  "AI": "#0f8a8a"
+  "AI": "#0f8a8a",
+  "原油": "#b8860b",
+  "プロ野球": "#c2185b",
+  "スポーツ": "#c2185b"
 };
 /* 「不動産・金利」のような組み合わせは、先頭の分類の色を使う */
 function catColor(c){
@@ -100,6 +107,7 @@ function catColor(c){
 var MARK = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
 var lastIdx = -1, lastPos = -1, items = [];
 var SEC = 0, START = new Date().getTime(), lastLoop = -1;
+var VSEC = 0, vOn = false, vBroken = false;
 
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -183,11 +191,39 @@ function rotate(){
   var pos = Math.floor(new Date().getTime() / 1000) % CYCLE;
   if (lastPos >= 0 && pos < lastPos) { safeReload(); }
   lastPos = pos;
+  var lap = CYCLE / LAPS, inLap = pos % lap;
+  /* 動画あり：1周（5分）の最後に動画を流し、残りの時間をニュースで分ける */
+  if (VSEC > 0 && !vBroken) {
+    if (inLap >= lap - VSEC) { videoOn(inLap - (lap - VSEC)); return; }
+    videoOff();
+    var per2 = (lap - VSEC) / items.length;
+    var k2 = Math.floor(inLap / per2);
+    if (k2 !== lastIdx) { show(k2); lastIdx = k2; }
+    $("prog").style.width = Math.round(1800 * ((inLap % per2) / per2)) + "px";
+    return;
+  }
+  videoOff();
   var per = CYCLE / (items.length * LAPS);
   var idx = Math.floor(pos / per) % items.length;
   if (idx !== lastIdx) { show(idx); lastIdx = idx; }
   var r = (pos % per) / per;
   $("prog").style.width = Math.round(1800 * r) + "px";
+}
+
+function videoOn(offset){
+  var v = $("vid");
+  if (!vOn) {
+    vOn = true; lastIdx = -1;
+    $("vbox").style.display = "block";
+    try { v.currentTime = offset; } catch (e) {}
+    var p = v.play(); if (p && p["catch"]) { p["catch"](function(){}); }
+  }
+}
+function videoOff(){
+  if (!vOn) return;
+  vOn = false;
+  $("vbox").style.display = "none";
+  try { $("vid").pause(); } catch (e) {}
 }
 
 window.onresize = fit;
@@ -198,6 +234,12 @@ if (typeof NEWS === "undefined" || !NEWS.items || !NEWS.items.length) {
 } else {
   items = NEWS.items;
   SEC = Number(NEWS.seconds) || 0;
+  /* 動画の設定（news.js の video）。読み込めなかったときはニュースだけを流す */
+  if (NEWS.video && NEWS.video.file && Number(NEWS.video.seconds) > 0) {
+    VSEC = Number(NEWS.video.seconds);
+    $("vid").onerror = function(){ vBroken = true; videoOff(); lastIdx = -1; };
+    $("vid").src = NEWS.video.file;
+  }
   $("wk").innerHTML = esc(NEWS.week || "");
   buildList(); rotate();
   setInterval(rotate, 1000);
