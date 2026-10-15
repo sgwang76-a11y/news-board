@@ -40,9 +40,9 @@ body{font-family:"Noto Sans JP","Noto Sans CJK JP","Meiryo","Hiragino Sans",sans
 #list table{width:1800px;border-collapse:separate;border-spacing:0;table-layout:fixed;}
 #list td{padding:0 6px;}
 #list td:first-child{padding-left:0;} #list td:last-child{padding-right:0;}
-.it{height:146px;background:#eef3fb;border-top:8px solid #9fb3d9;overflow:hidden;padding:10px 16px 0 16px;
+.it{height:146px;background:#eef3fb;border-top:8px solid #9fb3d9;overflow:hidden;padding:10px 10px 0 12px;
   -webkit-box-sizing:border-box;box-sizing:border-box;}
-.it .n{font-size:28px;font-weight:bold;color:#1f2fb8;white-space:nowrap;overflow:hidden;}
+.it .n{font-size:28px;font-weight:bold;color:#1f2fb8;white-space:nowrap;overflow:hidden;letter-spacing:-1px;}
 .it .h{font-size:27px;font-weight:bold;color:#334;line-height:1.32;height:72px;margin-top:4px;overflow:hidden;margin-top:2px;}
 .it.on{background:#1f2fb8;border-top-color:#e0357f;}
 .it.on .n{color:#ffd1e3;} .it.on .h{color:#fff;}
@@ -147,10 +147,13 @@ function buildList(){
             '</div><div class="h">' + esc(items[i].title) + "</div></div></td>";
   }
   $("lr").innerHTML = html;
-  /* 件数が多い週は、一覧の分類名が枠に収まるよう小さくする */
-  var ns = $("lr").getElementsByTagName("div");
+  /* 一覧の分類名は、一番長いものが枠に収まる大きさに全件をそろえる */
+  var ns = $("lr").getElementsByTagName("div"), ok = function(e){ return e.scrollWidth > e.clientWidth; }, minS = 28;
   for (i = 0; i < ns.length; i++) {
-    if (ns[i].className === "n") shrink(ns[i], 28, 18, function(e){ return e.scrollWidth > e.clientWidth; });
+    if (ns[i].className === "n") { shrink(ns[i], 28, 16, ok); minS = Math.min(minS, parseInt(ns[i].style.fontSize, 10)); }
+  }
+  for (i = 0; i < ns.length; i++) {
+    if (ns[i].className === "n") ns[i].style.fontSize = minS + "px";
   }
 }
 
