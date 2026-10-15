@@ -77,8 +77,8 @@ body{font-family:"Noto Sans JP","Noto Sans CJK JP","Meiryo","Hiragino Sans",sans
 </div>
 
 <script>
-/* news.js を10分ごとに新しく読み込む（GitHub側の更新を反映するため） */
-document.write('<script src="news.js?v=' + Math.floor(new Date().getTime() / 600000) + '"><\/script>');
+/* news.js は毎回最新を読み込む（古い保存内容を使わない） */
+document.write('<script src="news.js?v=' + new Date().getTime() + '"><\/script>');
 </script>
 <script>
 var CYCLE = 600;              /* 1周10分（サイネージのスケジュールに合わせる） */
@@ -95,15 +95,20 @@ var CAT_COLOR = {
   "AI": "#0f8a8a",
   "原油": "#b8860b",
   "プロ野球": "#c2185b",
-  "スポーツ": "#c2185b"
+  "スポーツ": "#c2185b",
+  "企業": "#8d6e63"
 };
-/* 「不動産・金利」のような組み合わせは、先頭の分類の色を使う */
+/* 「政治・コンプライアンス」のような組み合わせは、前から順に見て最初に色がある分類の色を使う */
+function catParts(c){ return String(c || "").replace(/[【】]/g, "").split(/[・／\/]/); }
 function catColor(c){
   c = String(c || "");
   if (CAT_COLOR[c]) return CAT_COLOR[c];
-  var h = c.split(/[・／\/]/)[0];
-  return CAT_COLOR[h] || "#5a6478";
+  var p = catParts(c), i;
+  for (i = 0; i < p.length; i++) { if (CAT_COLOR[p[i]]) return CAT_COLOR[p[i]]; }
+  return "#5a6478";
 }
+/* 下段の一覧では、枠に収まるよう分類名の先頭だけを出す */
+function catShort(c){ return catParts(c)[0]; }
 var MARK = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
 var lastIdx = -1, lastPos = -1, items = [];
 var SEC = 0, START = new Date().getTime(), lastLoop = -1;
@@ -138,7 +143,7 @@ function shrink(el, start, min, test){
 function buildList(){
   var html = "", i;
   for (i = 0; i < items.length; i++) {
-    html += '<td><div class="it" id="it' + i + '"><div class="n">' + mark(i) + " " + esc(items[i].cat) +
+    html += '<td><div class="it" id="it' + i + '"><div class="n">' + mark(i) + " " + esc(catShort(items[i].cat)) +
             '</div><div class="h">' + esc(items[i].title) + "</div></div></td>";
   }
   $("lr").innerHTML = html;
@@ -226,6 +231,24 @@ function videoOff(){
   try { $("vid").pause(); } catch (e) {}
 }
 
+/* 1分ごとに GitHub 上の news.js を確認し、書き換わっていたらすぐに表示を切り替える */
+var lastNewsText = null;
+function checkNews(){
+  var x;
+  try {
+    x = new XMLHttpRequest();
+    x.open("GET", "news.js?chk=" + new Date().getTime(), true);
+    x.onreadystatechange = function(){
+      if (x.readyState !== 4 || x.status !== 200) return;
+      var t = x.responseText || "";
+      if (t.indexOf("var NEWS") < 0) return;          /* 読み込み途中・エラーのときは何もしない */
+      if (lastNewsText !== null && t !== lastNewsText) { safeReload(); }
+      lastNewsText = t;
+    };
+    x.send(null);
+  } catch (e) {}
+}
+
 window.onresize = fit;
 fit(); tick();
 if (typeof NEWS === "undefined" || !NEWS.items || !NEWS.items.length) {
@@ -243,6 +266,7 @@ if (typeof NEWS === "undefined" || !NEWS.items || !NEWS.items.length) {
   $("wk").innerHTML = esc(NEWS.week || "");
   buildList(); rotate();
   setInterval(rotate, 1000);
+  checkNews(); setInterval(checkNews, 60000);
 }
 setInterval(tick, 5000);
 </script>
