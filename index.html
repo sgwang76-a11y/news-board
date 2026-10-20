@@ -166,7 +166,7 @@ function show(i){
   $("hd").innerHTML = esc(n.title);
   $("bd").innerHTML = esc(n.body) + (n.note ? '<br><span id="nt">' + esc(n.note) + "</span>" : "");
   $("src").innerHTML = n.source ? "出典：" + esc(n.source) : "";
-  shrink($("hd"), 92, 56, function(e){ return e.scrollWidth > e.clientWidth; });
+  shrink($("hd"), 92, 44, function(e){ return e.scrollWidth > e.clientWidth; });
   shrink($("bd"), 54, 36, function(e){ return e.scrollHeight > e.clientHeight; });
   for (j = 0; j < items.length; j++) { $("it" + j).className = (j === i) ? "it on" : "it"; }
 }
