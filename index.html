@@ -51,6 +51,7 @@ body{font-family:"Noto Sans JP","Noto Sans CJK JP","Meiryo","Hiragino Sans",sans
 /* ニュースのあとに流す動画（画面全体に表示） */
 #vbox{display:none;position:absolute;left:0;top:0;width:1920px;height:1080px;background:#000;}
 #vid{width:1920px;height:1080px;display:block;background:#000;}
+#pic{display:none;width:1920px;height:1080px;}
 #err{display:none;position:absolute;left:60px;top:420px;width:1800px;text-align:center;font-size:56px;font-weight:bold;color:#1a2a6c;}
 </style>
 </head>
@@ -73,7 +74,7 @@ body{font-family:"Noto Sans JP","Noto Sans CJK JP","Meiryo","Hiragino Sans",sans
  <div id="list"><table><tr id="lr"></tr></table></div>
  <div id="foot">各見出しは報道・公表資料をもとに作成</div>
  <div id="err">ニュースを読み込めませんでした</div>
- <div id="vbox"><video id="vid" muted playsinline preload="auto"></video></div>
+ <div id="vbox"><video id="vid" muted playsinline preload="auto"></video><img id="pic" alt=""></div>
 </div>
 
 <script>
@@ -112,7 +113,7 @@ function catShort(c){ return catParts(c)[0]; }
 var MARK = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
 var lastIdx = -1, lastPos = -1, items = [];
 var SEC = 0, START = new Date().getTime(), lastLoop = -1;
-var VSEC = 0, vOn = false, vBroken = false;
+var VSEC = 0, vOn = false, vBroken = false, useImg = false;
 
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -223,6 +224,7 @@ function videoOn(offset){
   if (!vOn) {
     vOn = true; lastIdx = -1;
     $("vbox").style.display = "block";
+    if (useImg) return;
     try { v.currentTime = offset; } catch (e) {}
     var p = v.play(); if (p && p["catch"]) { p["catch"](function(){}); }
   }
@@ -260,8 +262,15 @@ if (typeof NEWS === "undefined" || !NEWS.items || !NEWS.items.length) {
 } else {
   items = NEWS.items;
   SEC = Number(NEWS.seconds) || 0;
+  /* 画像の設定（news.js の image）。1周の最後に画面全体に表示する。読み込めなかったときはニュースだけを流す */
+  if (NEWS.image && NEWS.image.file && Number(NEWS.image.seconds) > 0) {
+    VSEC = Number(NEWS.image.seconds); useImg = true;
+    $("vid").style.display = "none"; $("pic").style.display = "block";
+    $("pic").onerror = function(){ vBroken = true; videoOff(); lastIdx = -1; };
+    $("pic").src = NEWS.image.file + "?v=" + new Date().getTime();
+  }
   /* 動画の設定（news.js の video）。読み込めなかったときはニュースだけを流す */
-  if (NEWS.video && NEWS.video.file && Number(NEWS.video.seconds) > 0) {
+  else if (NEWS.video && NEWS.video.file && Number(NEWS.video.seconds) > 0) {
     VSEC = Number(NEWS.video.seconds);
     $("vid").onerror = function(){ vBroken = true; videoOff(); lastIdx = -1; };
     $("vid").src = NEWS.video.file;
