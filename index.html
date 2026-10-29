@@ -52,17 +52,38 @@ body{font-family:"Noto Sans JP","Noto Sans CJK JP","Meiryo","Hiragino Sans",sans
 #vbox{display:none;position:absolute;left:0;top:0;width:1920px;height:1080px;background:#000;}
 #vid{width:1920px;height:1080px;display:block;background:#000;}
 #pic{display:none;width:1920px;height:1080px;}
+/* ===== 不動産ニュースの見た目（#stage に re クラスが付いたとき） ===== */
+.sky{display:none;position:absolute;left:0;bottom:0;}
+#skyS{opacity:0.10;}
+#skyC{opacity:0.06;}
+#stage.re{background:#e1e7e5;}
+#stage.re .sky{display:block;}
+#stage.re #clock{color:#a8752a;}
+#stage.re #ttl, #stage.re #date{color:#1e4d4a;}
+#stage.re #bar{background:#1e4d4a;}
+#stage.re #cnt{color:#cfe1dc;}
+#stage.re #hd{color:#13302e;border-left-color:#b8893a;}
+#stage.re #rule{background:#e1e7e5;}
+#stage.re #bd{color:#1f2e2c;}
+#stage.re #prog{background:#b8893a;}
+#stage.re .it{background:#f2f5f4;border-top-color:#a9bdb8;}
+#stage.re .it .n{color:#1e4d4a;}
+#stage.re .it.on{background:#1e4d4a;border-top-color:#b8893a;}
+#stage.re .it.on .n{color:#f0d9a8;}
+#stage.re #foot{color:#2c4744;}
 #err{display:none;position:absolute;left:60px;top:420px;width:1800px;text-align:center;font-size:56px;font-weight:bold;color:#1a2a6c;}
 </style>
 </head>
 <body>
 <div id="stage">
+ <svg class="sky" id="skyS" xmlns="http://www.w3.org/2000/svg" width="1920" height="460" viewBox="0 0 1920 460" preserveAspectRatio="none"><g fill="#1e4d4a"><rect x="0" y="44" width="104" height="416"/><rect x="51" y="16" width="6" height="28"/><rect x="110" y="25" width="94" height="435"/><rect x="156" y="-3" width="6" height="28"/><rect x="210" y="82" width="54" height="378"/><rect x="220" y="60" width="34" height="22"/><rect x="270" y="46" width="94" height="414"/><rect x="370" y="204" width="84" height="256"/><rect x="460" y="315" width="64" height="145"/><rect x="470" y="293" width="44" height="22"/><rect x="530" y="168" width="54" height="292"/><rect x="590" y="80" width="124" height="380"/><rect x="720" y="104" width="64" height="356"/><rect x="790" y="254" width="94" height="206"/><rect x="800" y="232" width="74" height="22"/><rect x="890" y="69" width="84" height="391"/><rect x="931" y="41" width="6" height="28"/><rect x="980" y="168" width="64" height="292"/><rect x="1050" y="49" width="144" height="411"/><rect x="1200" y="308" width="144" height="152"/><rect x="1350" y="155" width="84" height="305"/><rect x="1440" y="214" width="74" height="246"/><rect x="1520" y="177" width="124" height="283"/><rect x="1581" y="149" width="6" height="28"/><rect x="1650" y="75" width="94" height="385"/><rect x="1696" y="47" width="6" height="28"/><rect x="1750" y="112" width="74" height="348"/><rect x="1760" y="90" width="54" height="22"/><rect x="1830" y="110" width="64" height="350"/><rect x="1840" y="88" width="44" height="22"/><rect x="1900" y="129" width="54" height="331"/></g></svg>
  <div id="clock">--:--</div>
- <div id="ttl"><div class="t">今日のニュース</div><div class="w" id="wk"></div></div>
+ <div id="ttl"><div class="t" id="tt">今日のニュース</div><div class="w" id="wk"></div></div>
  <div id="logo"><img src="logo.png" alt="青山メインランド"></div>
  <div id="date"></div>
 
  <div id="card">
+  <svg class="sky" id="skyC" xmlns="http://www.w3.org/2000/svg" width="1800" height="330" viewBox="0 0 1800 330" preserveAspectRatio="none"><g fill="#1e4d4a"><rect x="0" y="88" width="94" height="242"/><rect x="100" y="101" width="94" height="229"/><rect x="110" y="79" width="74" height="22"/><rect x="200" y="70" width="94" height="260"/><rect x="210" y="48" width="74" height="22"/><rect x="300" y="154" width="94" height="176"/><rect x="346" y="126" width="6" height="28"/><rect x="400" y="79" width="54" height="251"/><rect x="460" y="72" width="84" height="258"/><rect x="501" y="44" width="6" height="28"/><rect x="550" y="216" width="74" height="114"/><rect x="586" y="188" width="6" height="28"/><rect x="630" y="78" width="104" height="252"/><rect x="681" y="50" width="6" height="28"/><rect x="740" y="148" width="94" height="182"/><rect x="840" y="68" width="104" height="262"/><rect x="850" y="46" width="84" height="22"/><rect x="950" y="114" width="74" height="216"/><rect x="1030" y="50" width="74" height="280"/><rect x="1110" y="224" width="124" height="106"/><rect x="1171" y="196" width="6" height="28"/><rect x="1240" y="129" width="74" height="201"/><rect x="1276" y="101" width="6" height="28"/><rect x="1320" y="133" width="124" height="197"/><rect x="1381" y="105" width="6" height="28"/><rect x="1450" y="56" width="54" height="274"/><rect x="1476" y="28" width="6" height="28"/><rect x="1510" y="218" width="104" height="112"/><rect x="1620" y="124" width="64" height="206"/><rect x="1651" y="96" width="6" height="28"/><rect x="1690" y="32" width="104" height="298"/></g></svg>
   <div id="bar"><div id="no"></div><div id="cat"></div><div id="cnt"></div></div>
   <div id="hd"></div>
   <div id="rule"></div>
@@ -110,8 +131,13 @@ function catColor(c){
 }
 /* 下段の一覧では、枠に収まるよう分類名の先頭だけを出す */
 function catShort(c){ return catParts(c)[0]; }
+/* 不動産ニュースは全件「不動産」なので、一覧では2つ目の分類（例：マンション市場）を出す */
+function listCat(c, theme){ var p = catParts(c); return (theme === "re" && p.length > 1) ? p[1] : p[0]; }
 var MARK = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
 var lastIdx = -1, lastPos = -1, items = [];
+/* 番組（今日のニュース／不動産ニュース）ごとの開始位置・件数・見た目 */
+var SECS = [], curSec = -1;
+function secOf(i){ var k; for (k = SECS.length - 1; k >= 0; k--) { if (i >= SECS[k].start) return k; } return 0; }
 var SEC = 0, START = new Date().getTime(), lastLoop = -1;
 var VSEC = 0, vOn = false, vBroken = false, useImg = false;
 
@@ -141,11 +167,12 @@ function shrink(el, start, min, test){
   while (s > min && test(el)) { s -= 2; el.style.fontSize = s + "px"; }
 }
 
-function buildList(){
-  var html = "", i;
-  for (i = 0; i < items.length; i++) {
-    html += '<td><div class="it" id="it' + i + '"><div class="n">' + mark(i) + " " + esc(catShort(items[i].cat)) +
-            '</div><div class="h">' + esc(items[i].title) + "</div></div></td>";
+function buildList(sec){
+  var html = "", i, S = SECS[sec];
+  for (i = 0; i < S.n; i++) {
+    var it = items[S.start + i];
+    html += '<td><div class="it" id="it' + i + '"><div class="n">' + mark(i) + " " + esc(listCat(it.cat, S.theme)) +
+            '</div><div class="h">' + esc(it.title) + "</div></div></td>";
   }
   $("lr").innerHTML = html;
   /* 一覧の分類名は、一番長いものが枠に収まる大きさに全件をそろえる */
@@ -160,16 +187,24 @@ function buildList(){
 
 function show(i){
   var n = items[i], col = catColor(n.cat), j;
-  $("no").innerHTML = mark(i);
+  var sec = secOf(i), S = SECS[sec], li = i - S.start;
+  if (sec !== curSec) {
+    curSec = sec;
+    $("stage").className = S.theme;
+    $("tt").innerHTML = esc(S.title);
+    buildList(sec);
+  }
+  if (S.theme === "re") col = "#b8893a";
+  $("no").innerHTML = mark(li);
   $("cat").innerHTML = esc(n.cat);
   $("cat").style.background = col;
-  $("cnt").innerHTML = (i + 1) + " / " + items.length;
+  $("cnt").innerHTML = (li + 1) + " / " + S.n;
   $("hd").innerHTML = esc(n.title);
   $("bd").innerHTML = esc(n.body) + (n.note ? '<br><span id="nt">' + esc(n.note) + "</span>" : "");
   $("src").innerHTML = n.source ? "出典：" + esc(n.source) : "";
   shrink($("hd"), 92, 44, function(e){ return e.scrollWidth > e.clientWidth; });
   shrink($("bd"), 54, 36, function(e){ return e.scrollHeight > e.clientHeight; });
-  for (j = 0; j < items.length; j++) { $("it" + j).className = (j === i) ? "it on" : "it"; }
+  for (j = 0; j < S.n; j++) { $("it" + j).className = (j === li) ? "it on" : "it"; }
 }
 
 function safeReload(){
@@ -260,7 +295,13 @@ if (typeof NEWS === "undefined" || !NEWS.items || !NEWS.items.length) {
   $("card").style.display = "none"; $("list").style.display = "none"; $("err").style.display = "block";
   setTimeout(function(){ location.replace(location.href.split("?")[0] + "?t=" + new Date().getTime()); }, 60000);
 } else {
-  items = NEWS.items;
+  /* 今日のニュースのあとに、不動産ニュース（news.js の estate）を続けて流す */
+  items = NEWS.items.slice(0);
+  SECS = [{ title: NEWS.title || "今日のニュース", start: 0, n: NEWS.items.length, theme: "" }];
+  if (NEWS.estate && NEWS.estate.items && NEWS.estate.items.length) {
+    SECS.push({ title: NEWS.estate.title || "不動産ニュース", start: items.length, n: NEWS.estate.items.length, theme: "re" });
+    items = items.concat(NEWS.estate.items);
+  }
   SEC = Number(NEWS.seconds) || 0;
   /* 画像の設定（news.js の image）。1周の最後に画面全体に表示する。読み込めなかったときはニュースだけを流す */
   if (NEWS.image && NEWS.image.file && Number(NEWS.image.seconds) > 0) {
@@ -276,7 +317,7 @@ if (typeof NEWS === "undefined" || !NEWS.items || !NEWS.items.length) {
     $("vid").src = NEWS.video.file;
   }
   $("wk").innerHTML = esc(NEWS.week || "");
-  buildList(); rotate();
+  rotate();
   setInterval(rotate, 1000);
   checkNews(); setInterval(checkNews, 60000);
 }
