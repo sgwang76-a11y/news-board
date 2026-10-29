@@ -56,6 +56,15 @@ body{font-family:"Noto Sans JP","Noto Sans CJK JP","Meiryo","Hiragino Sans",sans
 /* 背景：青空と街並みの写真（estate-bg.jpg）。上部は文字が読めるよう白く薄める。文字の後ろの白い枠には何も重ねない */
 #stage.re{background:linear-gradient(to bottom, rgba(255,255,255,0.62) 0, rgba(255,255,255,0.45) 150px, rgba(255,255,255,0) 300px),
   #9cc6ec url(estate-bg.jpg) center center / cover no-repeat;}
+/* 空に重ねてゆっくり流れる雲。奥の薄い雲（clouds2.png）はゆっくり、手前の濃い雲（clouds.png）は少し速く流す */
+#clouds,#clouds2{display:none;position:absolute;left:0;top:0;width:3840px;height:640px;pointer-events:none;}
+#clouds2{background:url(clouds2.png) 0 0 / 1920px 640px repeat-x;}
+#clouds{background:url(clouds.png) 0 0 / 1920px 640px repeat-x;}
+#stage.re #clouds2{display:block;-webkit-animation:cloudDrift 260s linear infinite;animation:cloudDrift 260s linear infinite;}
+#stage.re #clouds{display:block;opacity:0.75;-webkit-animation:cloudDrift 150s linear infinite;animation:cloudDrift 150s linear infinite;}
+@-webkit-keyframes cloudDrift{from{-webkit-transform:translateX(-1920px);}to{-webkit-transform:translateX(0);}}
+@keyframes cloudDrift{from{transform:translateX(-1920px);}to{transform:translateX(0);}}
+@media (prefers-reduced-motion: reduce){#stage.re #clouds,#stage.re #clouds2{-webkit-animation:none;animation:none;}}
 #stage.re #clock{color:#a8752a;}
 #stage.re #ttl, #stage.re #date{color:#1e4d4a;}
 /* 本文の白い枠を少し透かして背景の写真を見せる。ぼかしに対応した画面は透かしを強め、非対応の画面は文字を優先して薄めに透かす */
@@ -79,6 +88,8 @@ body{font-family:"Noto Sans JP","Noto Sans CJK JP","Meiryo","Hiragino Sans",sans
 </head>
 <body>
 <div id="stage">
+ <div id="clouds2"></div>
+ <div id="clouds"></div>
  <div id="clock">--:--</div>
  <div id="ttl"><div class="t" id="tt">今日のニュース</div><div class="w" id="wk"></div></div>
  <div id="logo"><img src="logo.png" alt="青山メインランド"></div>
